@@ -52,6 +52,12 @@ const BookingSearchModal = ({ isOpen, onClose }) => {
           <button className="close-btn" onClick={handleClose}>
             <X size={24} />
           </button>
+          <button
+  className="calendar-link-btn"
+  onClick={() => window.location.href = '/calendario-reservas'}
+>
+  Calendario
+</button>
         </div>
 
         <form onSubmit={handleSearch} className="search-form">
