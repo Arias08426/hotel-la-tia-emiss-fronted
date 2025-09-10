@@ -4,10 +4,11 @@ import Navbar from './components/Navbar/Navbar';
 import Home from './pages/Home/Home';
 import Footer from './components/Footer/Footer';
 import SobreNosotros from './pages/SobreNosotros/SobreNosotros';
-import ReservasPage from './pages/Reservas/ReservasPage';
+import Reservas from './pages/Reservas/Reservaspage';
 import Habitaciones from './pages/Habitaciones/Habitaciones';
 import Contacto from './pages/Contacto/Contacto';
 import NuestrosServicios from './pages/NuestrosServicios/NuestrosServicios';
+
 import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
 import './styles/global.css';
@@ -23,7 +24,7 @@ function App() {
             <Route path="/sobre-nosotros" element={<SobreNosotros />} />
             <Route path="/habitaciones" element={<Habitaciones />} />
             <Route path="/servicio" element={<NuestrosServicios />} />
-            <Route path="/reservas" element={<ReservasPage />} />
+            <Route path="/reservas" element={<Reservas />} />
             <Route path="/Contacto" element={<Contacto />} />
           </Routes>
         </main>
