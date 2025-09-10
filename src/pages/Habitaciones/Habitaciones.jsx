@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Star, Users, Wifi, Coffee, Bath, Bed, ArrowRight, Eye, MapPin, Clock, Shield, Heart } from 'lucide-react';
+import CardHabitacion from '../../components/CardHabitacion/CardHabitacion';
 import './Habitaciones.css';
 
 const Habitaciones = () => {
@@ -9,83 +10,59 @@ const Habitaciones = () => {
   const habitaciones = [
     {
       id: 1,
-      titulo: 'Habitación Sencilla - Doble',
+      titulo: 'Doble/Single',
       subtitulo: 'Suite Clásica',
-      descripcion: 'Descanse en nuestra acogedora habitación con una cama doble, perfecta para viajeros solitarios o parejas que buscan un espacio íntimo y confortable. Decorada con elementos que evocan la rica historia de Salento y el legado de la Tía Emiss, esta habitación combina el encanto tradicional con las comodidades modernas que necesita para una estancia memorable en el corazón del eje cafetero.',
+      descripcion: 'Descanse en nuestra acogedora habitación con una cama doble, perfecta para viajeros solitarios o parejas que buscan un espacio íntimo y confortable. Decorada con elementos que evocan la rica historia de Salento y el legado de la Tía Emiss, esta habitación combina el encanto tradicional con las comodidades modernas que necesita para una estancia memorable en el corazón del eje cafetero. 1 cama doble.',
       imagen: 'https://app.lobbypms.com/permanent/uploads/161506806b1fac1703.jpg',
       precio: '150,000',
       capacidad: 2,
       categoria: 'sencilla',
-      amenidades: ['Wifi Gratuito', 'Desayuno', 'Baño Privado', 'Aire Acondicionado', 'TV Cable', 'Agua Caliente'],
+      amenidades: ['Wifi', 'Desayuno', 'Baño Privado', 'Aire Acondicionado'],
       rating: 4.8,
       metros: 25,
-      popular: false,
-      caracteristicas: [
-        { icono: Bed, texto: '1 Cama Doble' },
-        { icono: Users, texto: 'Hasta 2 personas' },
-        { icono: Bath, texto: 'Baño privado' },
-        { icono: Wifi, texto: 'WiFi gratuito' }
-      ]
+      popular: false
     },
     {
       id: 2,
-      titulo: 'Doble Twin',
+      titulo: 'Doble twin',
       subtitulo: 'Suite Premium',
-      descripcion: 'Disfrute de amplitud y comodidad en nuestra habitación Doble Twin, equipada con dos camas dobles ideales para familias pequeñas o amigos viajeros.',
-      imagen: 'https://app.lobbypms.com/permanent/uploads/161506806b33aab7f2.jpg',
+      descripcion: 'Disfrute de amplitud y comodidad en nuestra habitación Doble Twin, equipada con dos camas dobles ideales para familias pequeñas o amigos viajeros. Con un ambiente cálido que refleja la hospitalidad que caracterizó a la Tía Emiss, este espacio le brinda el descanso perfecto después de explorar las maravillas naturales y culturales de Salento. 2 camas dobles',
+      imagen: 'https://app.lobbypms.com/permanent/uploads/161506806b32a1bf54.jpg',
       precio: '220,000',
       capacidad: 4,
       categoria: 'doble',
-      amenidades: ['Wifi Gratuito', 'Desayuno', 'Jacuzzi', 'Minibar', 'Terraza', 'Room Service'],
+      amenidades: ['Wifi', 'Desayuno', 'Jacuzzi', 'Minibar', 'Terraza'],
       rating: 4.9,
       metros: 35,
-      popular: true,
-      caracteristicas: [
-        { icono: Bed, texto: '2 Camas Dobles' },
-        { icono: Users, texto: 'Hasta 4 personas' },
-        { icono: Bath, texto: 'Baño con jacuzzi' },
-        { icono: Coffee, texto: 'Minibar incluido' }
-      ]
+      popular: true
     },
     {
       id: 3,
-      titulo: 'Triple Twin',
+      titulo: 'Triple twin',
       subtitulo: 'Suite Familiar',
-      descripcion: 'Nuestra espaciosa habitación Triple Twin ofrece tres camas dobles, proporcionando el equilibrio perfecto entre privacidad y convivencia.',
-      imagen: 'https://app.lobbypms.com/permanent/uploads/161506806b385c781b.jpg',
+      descripcion: 'Nuestra espaciosa habitación Triple Twin ofrece tres camas dobles, proporcionando el equilibrio perfecto entre privacidad y convivencia para grupos de amigos o familias. El diseño cuidadosamente pensado y la decoración que honra las raíces quindianas de la Tía Emiss crean un ambiente acogedor donde podrá relajarse y compartir las experiencias vividas durante el día. 3 camas dobles.',
+      imagen: 'https://app.lobbypms.com/permanent/uploads/161506806b37a9a607.jpg',
       precio: '280,000',
       capacidad: 6,
       categoria: 'triple',
-      amenidades: ['Wifi Gratuito', 'Desayuno', 'Sala de Estar', 'Kitchenette', 'Área de Juegos', 'Terraza'],
+      amenidades: ['Wifi', 'Desayuno', 'Sala de Estar', 'Kitchenette'],
       rating: 4.7,
       metros: 45,
-      popular: false,
-      caracteristicas: [
-        { icono: Bed, texto: '3 Camas Dobles' },
-        { icono: Users, texto: 'Hasta 6 personas' },
-        { icono: Coffee, texto: 'Kitchenette' },
-        { icono: Heart, texto: 'Sala de estar' }
-      ]
+      popular: false
     },
     {
       id: 4,
       titulo: 'Habitación Cuádruple Twin',
-      subtitulo: 'Experiencia Premium',
-      descripcion: 'Ideal para familias numerosas o grupos de amigos, la habitación Cuádruple Twin cuenta con cuatro camas dobles y todo el espacio necesario.',
+      subtitulo: 'Experiencia Única',
+      descripcion: 'Ideal para familias numerosas o grupos de amigos, la habitación Cuádruple Twin cuenta con cuatro camas dobles y todo el espacio necesario para una estancia cómoda y placentera. Inspirada en la generosidad y espíritu comunitario de la Tía Emiss, esta habitación es perfecta para quienes valoran tanto la privacidad como los momentos compartidos, ofreciendo un refugio acogedor en un edificio lleno de historia y tradición salentina. 4 camas dobles.',
       imagen: 'https://app.lobbypms.com/permanent/uploads/161506806b2ad9e4bd.jpg',
       precio: '450,000',
       capacidad: 8,
       categoria: 'presidencial',
-      amenidades: ['Wifi Gratuito', 'Butler', 'Spa Privado', 'Chef Personal', 'Terraza Premium', 'Concierge'],
+      amenidades: ['Wifi', 'Butler', 'Spa Privado', 'Chef Personal', 'Terraza Premium'],
       rating: 5.0,
       metros: 75,
-      popular: true,
-      caracteristicas: [
-        { icono: Bed, texto: '4 Camas Dobles' },
-        { icono: Users, texto: 'Hasta 8 personas' },
-        { icono: Shield, texto: 'Servicio premium' },
-        { icono: Heart, texto: 'Spa privado' }
-      ]
+      popular: true
     }
   ];
 
@@ -169,7 +146,7 @@ const Habitaciones = () => {
         </div>
       </section>
 
-      {/* Grid de habitaciones */}
+      {/* Grid de habitaciones - Contenido exacto de TiposHabitacion */}
       <section className="habitaciones-section">
         <div className="container">
           <div className="section-header">
@@ -178,68 +155,58 @@ const Habitaciones = () => {
           </div>
           <div className="habitaciones-grid">
             {habitacionesFiltradas.map((habitacion) => (
-              <div key={habitacion.id} className="habitacion-card">
-                <div className="card-image">
-                  <img src={habitacion.imagen} alt={habitacion.titulo} />
-                  {habitacion.popular && (
-                    <div className="popular-badge">
-                      <Star size={12} fill="currentColor" />
-                      Más Popular
-                    </div>
-                  )}
-                  <div className="capacity-badge">
-                    <Users size={14} />
-                    {habitacion.capacidad} Personas
-                  </div>
-                </div>
-                
-                <div className="card-content">
-                  <div className="card-header">
-                    <div>
-                      <h3>{habitacion.titulo}</h3>
-                      <p className="subtitulo">{habitacion.subtitulo}</p>
-                    </div>
-                    <div className="rating">
-                      <Star size={14} fill="#f4a261" />
-                      <span>{habitacion.rating}</span>
-                    </div>
-                  </div>
-
-                  <p className="descripcion">{habitacion.descripcion}</p>
-
-                  <div className="caracteristicas">
-                    {habitacion.caracteristicas.map((car, index) => (
-                      <div key={index} className="caracteristica">
-                        <car.icono size={16} />
-                        <span>{car.texto}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="amenidades">
-                    {habitacion.amenidades.slice(0, 3).map((amenidad, index) => (
-                      <span key={index} className="amenidad-tag">{amenidad}</span>
-                    ))}
-                    {habitacion.amenidades.length > 3 && (
-                      <span className="amenidad-tag more">
-                        +{habitacion.amenidades.length - 3} más
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="card-footer">
-                    <div className="precio-info">
-                      <span className="precio">Desde ${habitacion.precio}</span>
-                      <span className="periodo">COP por noche</span>
-                    </div>
-                    <button 
-                      className="ver-detalles-btn"
-                      onClick={() => setSelectedRoom(habitacion)}
-                    >
-                      <Eye size={16} />
-                      Ver Detalles
-                    </button>
-                  </div>
+              <div key={habitacion.id} style={{ position: 'relative' }}>
+                <div style={{ 
+                  position: 'relative',
+                  // CSS para ocultar todos los botones que contengan "RESERVAR"
+                }}>
+                  <style>{`
+                    .habitaciones-grid [class*="btn"]:not(.ver-detalles-btn-personalizado),
+                    .habitaciones-grid button:not(.ver-detalles-btn-personalizado) {
+                      display: none !important;
+                    }
+                    .habitaciones-grid .ver-detalles-btn-personalizado {
+                      display: flex !important;
+                    }
+                  `}</style>
+                  <CardHabitacion {...habitacion} />
+                  {/* Botón Ver Detalles posicionado exactamente donde estaba RESERVAR */}
+                  <button 
+                    className="ver-detalles-btn-personalizado"
+                    onClick={() => setSelectedRoom(habitacion)}
+                    style={{
+                      position: 'absolute',
+                      bottom: '20px',
+                      right: '20px',
+                      background: 'linear-gradient(135deg, #d4751a, #c06318)',
+                      color: 'white',
+                      border: 'none',
+                      padding: '10px 20px',
+                      borderRadius: '10px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      fontWeight: '500',
+                      fontSize: '14px',
+                      transition: 'all 0.3s ease',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                      boxShadow: '0 4px 15px rgba(212, 117, 26, 0.3)',
+                      zIndex: 1000
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.transform = 'translateY(-2px)';
+                      e.target.style.boxShadow = '0 8px 20px rgba(212, 117, 26, 0.4)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.boxShadow = '0 4px 15px rgba(212, 117, 26, 0.3)';
+                    }}
+                  >
+                    <Eye size={16} />
+                    Ver Detalles
+                  </button>
                 </div>
               </div>
             ))}
@@ -287,7 +254,26 @@ const Habitaciones = () => {
         </div>
       </section>
 
-      {/* Modal de detalles */}
+      {/* Call to Action - Contenido exacto de TiposHabitacion */}
+      <section className="section-cta">
+        <div className="container">
+          <div className="cta-content">
+            <h3>¿Necesitas ayuda para elegir?</h3>
+            <p>Nuestro equipo está disponible 24/7 para ayudarte a encontrar la suite perfecta</p>
+            <div className="cta-buttons">
+              <button 
+                className="btn-primary"
+                onClick={handleContactarAsesor}
+              >
+                <span>Contactar Asesor</span>
+                <ArrowRight size={18} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ÚNICO AGREGADO: Modal de detalles */}
       {selectedRoom && (
         <div className="modal-overlay" onClick={() => setSelectedRoom(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>

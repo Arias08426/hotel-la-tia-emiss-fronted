@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Users, Wifi, Coffee, Bath, Star, X, Calendar, Check, ArrowRight, Loader, LogIn, Search, Trash2, Eye } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  ArrowLeft, Users, Wifi, Coffee, Bath, X, Check,
+  Loader, LogIn, Search, Trash2, Eye
+} from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom';
 import ApiService from "../../components/Servicios/ApiService";
 import './ReservasPage.css';
 
-// Componente para buscar reservas por código
+/* ======================= MODAL: BUSCAR RESERVA ======================= */
 const BookingSearchModal = ({ isOpen, onClose }) => {
   const [searchCode, setSearchCode] = useState('');
   const [searchResult, setSearchResult] = useState(null);
@@ -15,19 +18,17 @@ const BookingSearchModal = ({ isOpen, onClose }) => {
   const handleSearch = async (e) => {
     e.preventDefault();
     if (!searchCode.trim()) return;
-
     try {
       setLoading(true);
       setError('');
       const result = await ApiService.getBookingByConfirmation(searchCode.trim());
-      
-      if (result.statusCode === 200) {
+      if (result?.statusCode === 200 && result.booking) {
         setSearchResult(result.booking);
       } else {
-        setError(result.message || 'Reserva no encontrada');
+        setError(result?.message || 'Reserva no encontrada');
         setSearchResult(null);
       }
-    } catch (error) {
+    } catch (err) {
       setError('Error al buscar la reserva');
       setSearchResult(null);
     } finally {
@@ -43,7 +44,6 @@ const BookingSearchModal = ({ isOpen, onClose }) => {
   };
 
   if (!isOpen) return null;
-
   return (
     <div className="modal-overlay" onClick={handleClose}>
       <div className="modal-content search-modal" onClick={(e) => e.stopPropagation()}>
@@ -71,11 +71,7 @@ const BookingSearchModal = ({ isOpen, onClose }) => {
           </button>
         </form>
 
-        {error && (
-          <div className="error-message">
-            <p>{error}</p>
-          </div>
-        )}
+        {error && <div className="error-message"><p>{error}</p></div>}
 
         {searchResult && (
           <div className="search-result">
@@ -85,7 +81,7 @@ const BookingSearchModal = ({ isOpen, onClose }) => {
               <p><strong>Habitación:</strong> {searchResult.room?.roomType}</p>
               <p><strong>Check-in:</strong> {new Date(searchResult.checkInDate).toLocaleDateString('es-CO')}</p>
               <p><strong>Check-out:</strong> {new Date(searchResult.checkOutDate).toLocaleDateString('es-CO')}</p>
-              <p><strong>Huéspedes:</strong> {searchResult.numOfAdults + searchResult.numOfChildren}</p>
+              <p><strong>Huéspedes:</strong> {(searchResult.numOfAdults || 0) + (searchResult.numOfChildren || 0)}</p>
               <p><strong>Cliente:</strong> {searchResult.user?.name}</p>
               <p><strong>Email:</strong> {searchResult.user?.email}</p>
             </div>
@@ -96,66 +92,56 @@ const BookingSearchModal = ({ isOpen, onClose }) => {
   );
 };
 
-// Componente para listar todas las reservas (solo admin)
+/* ======================= MODAL: TODAS LAS RESERVAS (ADMIN) ======================= */
 const AllBookingsModal = ({ isOpen, onClose }) => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (isOpen) {
-      loadAllBookings();
-    }
-  }, [isOpen]);
+  useEffect(() => { if (isOpen) loadAllBookings(); }, [isOpen]);
 
   const loadAllBookings = async () => {
     try {
       setLoading(true);
       setError('');
       const result = await ApiService.getAllBookings();
-      
-      if (result.statusCode === 200) {
+      if (result?.statusCode === 200) {
         setBookings(result.bookingList || []);
       } else {
-        setError(result.message || 'Error cargando reservas');
+        setError(result?.message || 'Error cargando reservas');
       }
-    } catch (error) {
-      setError('Error cargando reservas: ' + error.message);
+    } catch (err) {
+      setError('Error cargando reservas: ' + (err.message || 'Desconocido'));
     } finally {
       setLoading(false);
     }
   };
 
   const handleCancelBooking = async (bookingId) => {
-    if (!window.confirm('¿Estás seguro de cancelar esta reserva?')) return;
-
+    if (!window.confirm('¿Seguro de cancelar esta reserva?')) return;
     try {
       const result = await ApiService.cancelBooking(bookingId);
-      if (result.statusCode === 200) {
-        alert('Reserva cancelada exitosamente');
-        loadAllBookings(); // Recargar lista
+      if (result?.statusCode === 200) {
+        alert('Reserva cancelada');
+        loadAllBookings();
       } else {
-        alert(result.message || 'Error cancelando reserva');
+        alert(result?.message || 'Error cancelando reserva');
       }
-    } catch (error) {
-      alert('Error cancelando reserva: ' + error.message);
+    } catch (err) {
+      alert('Error cancelando reserva: ' + err.message);
     }
   };
 
   if (!isOpen) return null;
-
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content bookings-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h3>Todas las Reservas</h3>
-          <button className="close-btn" onClick={onClose}>
-            <X size={24} />
-          </button>
+          <button className="close-btn" onClick={onClose}><X size={24} /></button>
         </div>
 
         {loading && <div className="loading-state"><Loader className="spinner" /> Cargando reservas...</div>}
-
         {error && (
           <div className="error-message">
             <p>{error}</p>
@@ -164,265 +150,297 @@ const AllBookingsModal = ({ isOpen, onClose }) => {
         )}
 
         {!loading && !error && (
-          <div className="bookings-list">
-            {bookings.length === 0 ? (
-              <p>No hay reservas registradas</p>
-            ) : (
-              bookings.map((booking) => (
-                <div key={booking.id} className="booking-card">
-                  <div className="booking-info">
-                    <h4>Reserva #{booking.bookingConfirmationCode}</h4>
-                    <p><strong>Habitación:</strong> {booking.room?.roomType}</p>
-                    <p><strong>Cliente:</strong> {booking.user?.name} ({booking.user?.email})</p>
-                    <p><strong>Fechas:</strong> {new Date(booking.checkInDate).toLocaleDateString()} - {new Date(booking.checkOutDate).toLocaleDateString()}</p>
-                    <p><strong>Huéspedes:</strong> {booking.totalNumOfGuest}</p>
+            <div className="bookings-list">
+              {bookings.length === 0
+                ? <p>No hay reservas registradas</p>
+                : bookings.map(b => (
+                  <div key={b.id} className="booking-card">
+                    <div className="booking-info">
+                      <h4>#{b.bookingConfirmationCode}</h4>
+                      <p><strong>Habitación:</strong> {b.room?.roomType}</p>
+                      <p><strong>Cliente:</strong> {b.user?.name} ({b.user?.email})</p>
+                      <p><strong>Fechas:</strong> {new Date(b.checkInDate).toLocaleDateString()} - {new Date(b.checkOutDate).toLocaleDateString()}</p>
+                      <p><strong>Huéspedes:</strong> {b.totalNumOfGuest || (b.numOfAdults || 0) + (b.numOfChildren || 0)}</p>
+                    </div>
+                    <div className="booking-actions">
+                      <button className="cancel-btn" title="Cancelar" onClick={() => handleCancelBooking(b.id)}>
+                        <Trash2 size={16}/>
+                      </button>
+                    </div>
                   </div>
-                  <div className="booking-actions">
-                    <button 
-                      className="cancel-btn"
-                      onClick={() => handleCancelBooking(booking.id)}
-                      title="Cancelar reserva"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+                ))
+              }
+            </div>
         )}
       </div>
     </div>
   );
 };
 
-// Componente ModalReserva actualizado con autenticación
+/* ======================= MODAL: RESERVA (Formulario Único) ======================= */
 const ModalReserva = ({ isOpen, onClose, habitacion }) => {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
+    nombre: '',
+    apellido: '',
+    email: '',
+    telefono: '',
     checkIn: '',
     checkOut: '',
     guests: 1,
-    nombre: '',
-    email: '',
-    telefono: '',
     comentarios: ''
   });
 
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [availabilityStatus, setAvailabilityStatus] = useState('idle'); // idle | checking | ok | not | error
   const [totalNights, setTotalNights] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
-  const [step, setStep] = useState(1);
-  
-  const [loading, setLoading] = useState(false);
-  const [availabilityChecked, setAvailabilityChecked] = useState(false);
-  const [isRoomAvailable, setIsRoomAvailable] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [reservationResult, setReservationResult] = useState(null);
 
-  // Imágenes para el carrusel
-  const additionalImages = [
-    habitacion?.roomPhotoUrl || habitacion?.imagen,
-    habitacion?.roomPhotoUrl || habitacion?.imagen,
-    habitacion?.roomPhotoUrl || habitacion?.imagen,
-    habitacion?.roomPhotoUrl || habitacion?.imagen
-  ].filter(Boolean);
+  const allowProceedOnAvailabilityError = true; // si el endpoint falla, permitir reservar
 
-  // Resetear cuando se abra el modal
   useEffect(() => {
     if (isOpen && habitacion) {
+      const splitName = isAuthenticated ? (user?.name || '').trim().split(' ') : [];
       setFormData({
+        nombre: splitName[0] || '',
+        apellido: splitName.slice(1).join(' ') || '',
+        email: isAuthenticated ? (user?.email || '') : '',
+        telefono: isAuthenticated ? (user?.phoneNumber || '') : '',
         checkIn: '',
         checkOut: '',
         guests: 1,
-        nombre: user?.name || '',
-        email: user?.email || '',
-        telefono: user?.phoneNumber || '',
         comentarios: ''
       });
-      setStep(1);
-      setCurrentImageIndex(0);
-      setAvailabilityChecked(false);
-      setIsRoomAvailable(true);
+      setAvailabilityStatus('idle');
+      setTotalNights(0);
+      setTotalPrice(0);
       setReservationResult(null);
     }
-  }, [isOpen, habitacion, user]);
+  }, [isOpen, habitacion, isAuthenticated, user]);
 
-  // Verificar disponibilidad con el backend
-  const checkRoomAvailability = async () => {
-    if (!formData.checkIn || !formData.checkOut || !habitacion) return;
-    
+  const formatCOP = (val) =>
+    new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(val || 0);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(f => ({ ...f, [name]: value }));
+  };
+
+  const diffDays = (ci, co) => {
+    const a = new Date(ci);
+    const b = new Date(co);
+    return Math.round((b - a) / 86400000);
+  };
+
+  const checkAvailability = useCallback(async (ci, co) => {
+    if (!ci || !co || !habitacion) { setAvailabilityStatus('idle'); return; }
+    const d = diffDays(ci, co);
+    if (d <= 0) { setAvailabilityStatus('idle'); setTotalNights(0); setTotalPrice(0); return; }
+
+    setTotalNights(d);
+    const nightly = parseFloat(
+      habitacion.roomPrice ||
+      habitacion.precio?.replace(/[,\.]/g, '') ||
+      '0'
+    );
+    setTotalPrice(d * nightly);
+
     try {
-      setLoading(true);
-      const availabilityData = {
-        checkInDate: formData.checkIn,
-        checkOutDate: formData.checkOut,
+      setAvailabilityStatus('checking');
+      const resp = await ApiService.checkRoomAvailability({
+        checkInDate: ci,
+        checkOutDate: co,
         roomType: habitacion.roomType || habitacion.titulo
-      };
+      });
 
-      const response = await ApiService.checkRoomAvailability(availabilityData);
-      
-      if (response.statusCode === 200 && response.roomList && response.roomList.length > 0) {
-        const isAvailable = response.roomList.some(room => room.id === habitacion.id);
-        setIsRoomAvailable(isAvailable);
+      if (resp?.statusCode === 200 && Array.isArray(resp.roomList)) {
+        const found = resp.roomList.some(r =>
+          (r.id || r.roomId) === (habitacion.id || habitacion.roomId)
+        );
+        setAvailabilityStatus(found ? 'ok' : 'not');
       } else {
-        setIsRoomAvailable(false);
+        setAvailabilityStatus('error');
       }
-      
-      setAvailabilityChecked(true);
-    } catch (error) {
-      console.error('Error verificando disponibilidad:', error);
-      setIsRoomAvailable(true);
-      setAvailabilityChecked(true);
-    } finally {
-      setLoading(false);
+    } catch {
+      setAvailabilityStatus('error');
     }
-  };
+  }, [habitacion]);
 
-  // Calcular noches y precio
   useEffect(() => {
-    if (formData.checkIn && formData.checkOut && habitacion) {
-      const checkIn = new Date(formData.checkIn);
-      const checkOut = new Date(formData.checkOut);
-      const diffTime = checkOut - checkIn;
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      
-      if (diffDays > 0) {
-        setTotalNights(diffDays);
-        const pricePerNight = parseFloat(habitacion?.roomPrice || habitacion?.precio?.replace(/[,\.]/g, '') || '0');
-        setTotalPrice(diffDays * pricePerNight);
-        checkRoomAvailability();
-      }
+    if (formData.checkIn && formData.checkOut) {
+      checkAvailability(formData.checkIn, formData.checkOut);
     }
-  }, [formData.checkIn, formData.checkOut, habitacion]);
+  }, [formData.checkIn, formData.checkOut, checkAvailability]);
 
-  const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
+  const canSubmit =
+    formData.nombre.trim() &&
+    formData.apellido.trim() &&
+    formData.email.trim() &&
+    formData.telefono.trim() &&
+    formData.checkIn &&
+    formData.checkOut &&
+    totalNights > 0 &&
+    (
+      availabilityStatus === 'ok' ||
+      (availabilityStatus === 'error' && allowProceedOnAvailabilityError)
+    ) &&
+    availabilityStatus !== 'not';
 
-  // Enviar reserva al backend
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+    if (!canSubmit) return;
+
     if (!isAuthenticated) {
-      alert('Debes iniciar sesión para hacer una reserva');
+      alert("Debes iniciar sesión para reservar (tu backend actual requiere userId).");
       navigate('/login');
       return;
     }
 
-    if (!isRoomAvailable) {
-      alert('Esta habitación no está disponible para las fechas seleccionadas');
-      return;
-    }
-    
     try {
-      setLoading(true);
-      
-      const bookingData = {
+      setSubmitting(true);
+      const bookingPayload = {
         checkInDate: formData.checkIn,
         checkOutDate: formData.checkOut,
         guests: formData.guests,
         numOfAdults: formData.guests,
         numOfChildren: 0,
         totalPrice: totalPrice
+        // Si amplías backend, aquí podrías incluir nombre/apellido/telefono
       };
-      
-      const response = await ApiService.createBooking(habitacion.id, user.id, bookingData);
-      
-      if (response.statusCode === 200) {
+
+      const res = await ApiService.createBooking(
+        (habitacion.id || habitacion.roomId),
+        user.id,
+        bookingPayload
+      );
+
+      if (res?.statusCode === 200) {
         setReservationResult({
           success: true,
-          confirmationCode: response.bookingConfirmationCode,
-          message: response.message || 'Reserva creada exitosamente'
+          code: res.bookingConfirmationCode || res.booking?.bookingConfirmationCode,
+          message: res.message || 'Reserva creada exitosamente'
         });
-        setStep(3);
       } else {
-        throw new Error(response.message || 'Error al procesar la reserva');
+        throw new Error(res?.message || 'Error creando reserva');
       }
-    } catch (error) {
-      console.error('Error creando reserva:', error);
+    } catch (err) {
       setReservationResult({
         success: false,
-        message: error.message || 'Error al procesar la reserva'
+        message: err.message || 'No se pudo crear la reserva'
       });
-      setStep(3);
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
-  };
-
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
-      minimumFractionDigits: 0
-    }).format(price);
   };
 
   if (!isOpen || !habitacion) return null;
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        {loading && (
-          <div className="loading-overlay">
-            <Loader size={24} className="spinner" />
-            <span>Procesando...</span>
-          </div>
-        )}
-
+      <div className="modal-content full-form" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>{habitacion.roomType || habitacion.titulo}</h2>
-          <button className="close-btn" onClick={onClose}>
-            <X size={24} />
-          </button>
+          <button className="close-btn" onClick={onClose}><X size={24} /></button>
         </div>
 
-        {step === 1 && (
-          <>
-            <div className="image-gallery">
-              <div className="main-image">
-                <img src={additionalImages[currentImageIndex]} alt={habitacion.roomType || habitacion.titulo} />
-                {additionalImages.length > 1 && (
-                  <>
-                    <button className="gallery-btn prev" onClick={() => setCurrentImageIndex((prev) => (prev - 1 + additionalImages.length) % additionalImages.length)}>‹</button>
-                    <button className="gallery-btn next" onClick={() => setCurrentImageIndex((prev) => (prev + 1) % additionalImages.length)}>›</button>
-                  </>
-                )}
+        {reservationResult ? (
+          <div className="confirmation-step">
+            <h3>{reservationResult.success ? '¡Reserva Confirmada!' : 'Error en la Reserva'}</h3>
+            <p>{reservationResult.message}</p>
+            {reservationResult.success && reservationResult.code && (
+              <div className="confirmation-details">
+                <p><strong>Código de confirmación:</strong> {reservationResult.code}</p>
+                <p className="confirmation-note">Guarda este código para buscar tu reserva.</p>
               </div>
-            </div>
-
-            <div className="room-info">
-              <div className="room-details">
-                <p className="room-description-modal">
-                  {habitacion.roomDescription || habitacion.descripcionDetallada || habitacion.descripcion}
-                </p>
-              </div>
-
-              <div className="booking-sidebar">
-                <div className="price-info-modal">
-                  <div className="price-main">
-                    <span className="price-modal">
-                      {formatPrice(habitacion.roomPrice || parseFloat(habitacion.precio?.replace(/[,\.]/g, '') || '0'))}
-                    </span>
-                    <span className="period-modal">COP por noche</span>
+            )}
+            <button className="close-success-btn" onClick={onClose}>Cerrar</button>
+          </div>
+        ) : (
+          <form className="booking-full-form" onSubmit={handleSubmit}>
+            <div className="two-columns">
+              <div className="left-side">
+                <div className="form-section">
+                  <h4>Datos del Huésped</h4>
+                  <div className="grid-2">
+                    <div className="input-group">
+                      <label>Nombre</label>
+                      <input
+                        name="nombre"
+                        value={formData.nombre}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                    <div className="input-group">
+                      <label>Apellido</label>
+                      <input
+                        name="apellido"
+                        value={formData.apellido}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="grid-2">
+                    <div className="input-group">
+                      <label>Email</label>
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                    <div className="input-group">
+                      <label>Teléfono</label>
+                      <input
+                        name="telefono"
+                        value={formData.telefono}
+                        onChange={handleChange}
+                        required
+                        pattern="^[0-9+()\\s-]{6,}$"
+                        title="Formato inválido"
+                      />
+                    </div>
+                  </div>
+                  <div className="input-group">
+                    <label>Comentarios (opcional)</label>
+                    <textarea
+                      name="comentarios"
+                      value={formData.comentarios}
+                      onChange={handleChange}
+                      rows={3}
+                      placeholder="Ej: Llegaré tarde..."
+                    />
                   </div>
                 </div>
 
-                <div className="quick-booking">
-                  <div className="date-inputs">
+                <div className="form-section">
+                  <h4>Fechas y Huéspedes</h4>
+                  <div className="grid-2">
                     <div className="input-group">
                       <label>Check-in</label>
                       <input
                         type="date"
                         name="checkIn"
                         value={formData.checkIn}
-                        onChange={handleInputChange}
                         min={new Date().toISOString().split('T')[0]}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setFormData(f => {
+                            let co = f.checkOut;
+                            if (co && diffDays(val, co) <= 0) {
+                              const d = new Date(val);
+                              d.setDate(d.getDate() + 1);
+                              co = d.toISOString().split('T')[0];
+                            }
+                            return { ...f, checkIn: val, checkOut: co };
+                          });
+                        }}
                         required
                       />
                     </div>
@@ -432,217 +450,226 @@ const ModalReserva = ({ isOpen, onClose, habitacion }) => {
                         type="date"
                         name="checkOut"
                         value={formData.checkOut}
-                        onChange={handleInputChange}
-                        min={formData.checkIn || new Date().toISOString().split('T')[0]}
+                        min={
+                          formData.checkIn
+                            ? (() => {
+                                const d = new Date(formData.checkIn);
+                                d.setDate(d.getDate() + 1);
+                                return d.toISOString().split('T')[0];
+                              })()
+                            : new Date().toISOString().split('T')[0]
+                        }
+                        onChange={handleChange}
                         required
                       />
                     </div>
                   </div>
-
                   <div className="input-group">
                     <label>Huéspedes</label>
-                    <select name="guests" value={formData.guests} onChange={handleInputChange}>
-                      {[...Array(4)].map((_, i) => (
+                    <select
+                      name="guests"
+                      value={formData.guests}
+                      onChange={handleChange}
+                    >
+                      {[...Array(6)].map((_, i) => (
                         <option key={i} value={i + 1}>{i + 1} {i === 0 ? 'persona' : 'personas'}</option>
                       ))}
                     </select>
                   </div>
 
-                  {formData.checkIn && formData.checkOut && availabilityChecked && (
-                    <div className={`availability-status ${isRoomAvailable ? 'available' : 'unavailable'}`}>
-                      {isRoomAvailable ? (
-                        <div className="availability-message success">
-                          <Check size={16} />
-                          <span>Habitación disponible</span>
-                        </div>
-                      ) : (
-                        <div className="availability-message error">
-                          <X size={16} />
-                          <span>No disponible para estas fechas</span>
-                        </div>
-                      )}
+                  <div className="availability-wrapper">
+                    {availabilityStatus === 'checking' && <p className="warn">Verificando disponibilidad...</p>}
+                    {availabilityStatus === 'ok' && <p className="ok">✔ Habitación disponible</p>}
+                    {availabilityStatus === 'not' && <p className="bad">✖ No disponible</p>}
+                    {availabilityStatus === 'error' && allowProceedOnAvailabilityError && (
+                      <p className="warn">No se pudo verificar, puedes continuar.</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="right-side">
+                <div className="summary-box">
+                  <h4>Resumen</h4>
+                  <p><strong>Habitación:</strong> {habitacion.roomType || habitacion.titulo}</p>
+                  <p><strong>Precio noche:</strong> {formatCOP(parseFloat(
+                    habitacion.roomPrice ||
+                    habitacion.precio?.replace(/[,\.]/g, '') ||
+                    '0'
+                  ))}</p>
+                  <p><strong>Noches:</strong> {totalNights > 0 ? totalNights : '-'}</p>
+                  <p><strong>Total:</strong> {totalNights > 0 ? formatCOP(totalPrice) : '-'}</p>
+
+                  {!isAuthenticated && (
+                    <div className="guest-hint">
+                      Debes iniciar sesión para confirmar (tu backend requiere userId).
                     </div>
                   )}
 
-                  {totalNights > 0 && isRoomAvailable && (
-                    <div className="price-summary">
-                      <div className="summary-row">
-                        <span>{totalNights} {totalNights === 1 ? 'noche' : 'noches'}</span>
-                        <span>{formatPrice(totalPrice)}</span>
-                      </div>
-                      <div className="summary-total">
-                        <strong>Total: {formatPrice(totalPrice)}</strong>
-                      </div>
-                    </div>
-                  )}
-
-                  <button 
-                    className="continue-btn"
-                    onClick={() => isAuthenticated ? setStep(2) : navigate('/login')}
-                    disabled={!formData.checkIn || !formData.checkOut || !availabilityChecked || (!isAuthenticated && !isRoomAvailable)}
+                  <button
+                    type="submit"
+                    className="submit-btn full"
+                    disabled={!canSubmit || submitting}
                   >
-                    {!isAuthenticated ? 'Inicia sesión para reservar' : 'Continuar Reserva'}
-                    {isAuthenticated ? <ArrowRight size={18} /> : <LogIn size={18} />}
+                    {submitting ? 'Procesando...' : 'Confirmar Reserva'}
                   </button>
+                  <button
+                    type="button"
+                    className="secondary-btn full"
+                    onClick={onClose}
+                    disabled={submitting}
+                    style={{ marginTop: '.6rem' }}
+                  >
+                    Cancelar
+                  </button>
+
+                  {!canSubmit && (
+                    <div className="small-note">
+                      Completa todos los datos y selecciona fechas válidas.
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
-          </>
-        )}
-
-        {step === 2 && isAuthenticated && (
-          <div className="booking-form">
-            <h3>Confirmar Reserva</h3>
-            <form onSubmit={handleSubmit}>
-              <div className="reservation-summary">
-                <h4>Resumen de tu reserva:</h4>
-                <div className="summary-details">
-                  <p><strong>{habitacion.roomType || habitacion.titulo}</strong></p>
-                  <p>Check-in: {new Date(formData.checkIn).toLocaleDateString('es-CO')}</p>
-                  <p>Check-out: {new Date(formData.checkOut).toLocaleDateString('es-CO')}</p>
-                  <p>Huéspedes: {formData.guests}</p>
-                  <p>Total: <strong>{formatPrice(totalPrice)}</strong></p>
-                </div>
-              </div>
-
-              <div className="form-actions">
-                <button type="button" className="back-btn" onClick={() => setStep(1)}>
-                  Volver
-                </button>
-                <button type="submit" className="submit-btn" disabled={loading}>
-                  {loading ? 'Procesando...' : 'Confirmar Reserva'}
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {step === 3 && reservationResult && (
-          <div className="confirmation-step">
-            <div className={`result-icon ${reservationResult.success ? 'success' : 'error'}`}>
-              {reservationResult.success ? '✅' : '❌'}
-            </div>
-            <h3>{reservationResult.success ? '¡Reserva Confirmada!' : 'Error en la Reserva'}</h3>
-            <p>{reservationResult.message}</p>
-            {reservationResult.success && reservationResult.confirmationCode && (
-              <div className="confirmation-details">
-                <p><strong>Código de confirmación:</strong> {reservationResult.confirmationCode}</p>
-                <p className="confirmation-note">
-                  Guarda este código para futuras consultas.
-                </p>
-              </div>
-            )}
-            <button className="close-success-btn" onClick={onClose}>
-              Cerrar
-            </button>
-          </div>
+          </form>
         )}
       </div>
     </div>
   );
 };
 
-// Función auxiliar para obtener capacidad
+/* ======================= UTIL CAPACIDAD ======================= */
 const getCapacityFromRoomType = (roomType) => {
-  const type = roomType?.toLowerCase() || '';
-  if (type.includes('sencilla') || type.includes('single')) return 2;
-  if (type.includes('doble') || type.includes('twin')) return 4;
-  if (type.includes('triple')) return 6;
-  if (type.includes('cuadruple')) return 8;
+  const t = (roomType || '').toLowerCase();
+  if (t.includes('cuadruple')) return 8;
+  if (t.includes('triple')) return 6;
+  if (t.includes('doble') || t.includes('twin')) return 4;
+  if (t.includes('sencilla') || t.includes('single')) return 2;
   return 2;
 };
 
-// Componente principal ReservasPage con autenticación completa
+/* ======================= PAGE PRINCIPAL ======================= */
 const ReservasPage = () => {
   const { user, isAuthenticated, isAdmin } = useAuth();
-  
+
   const [modalOpen, setModalOpen] = useState(false);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [allBookingsModalOpen, setAllBookingsModalOpen] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(null);
-  
+
   const [filters, setFilters] = useState({
     guests: 'all',
     priceRange: 'all',
     amenities: 'all',
     checkIn: '',
-    checkOut: ''
+    checkOut: '',
+    roomType: 'all'
   });
-  
+
   const [rooms, setRooms] = useState([]);
   const [filteredRooms, setFilteredRooms] = useState([]);
+  const [roomTypes, setRoomTypes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingRoomTypes, setLoadingRoomTypes] = useState(false);
   const [error, setError] = useState(null);
   const [searchMode, setSearchMode] = useState(false);
 
-  // Cargar habitaciones del backend
+  const loadRoomTypes = async () => {
+    try {
+      setLoadingRoomTypes(true);
+      const types = await ApiService.getRoomTypes();
+      if (Array.isArray(types)) setRoomTypes(types);
+    } catch (err) {
+      console.warn('No se pudieron cargar tipos de habitación:', err.message);
+    } finally {
+      setLoadingRoomTypes(false);
+    }
+  };
+
   const loadRoomsFromBackend = async () => {
     try {
       setLoading(true);
       setError(null);
-
       const response = await ApiService.getAllRooms();
-      
-      if (response.statusCode === 200 && response.roomList) {
-        const roomsWithCompatibility = response.roomList.map(room => ({
-          ...room,
-          titulo: room.roomType,
-          precio: room.roomPrice?.toString() || '0',
-          imagen: room.roomPhotoUrl,
-          capacidad: getCapacityFromRoomType(room.roomType),
-          descripcion: room.roomDescription,
-        }));
+      const list = Array.isArray(response)
+        ? response
+        : (Array.isArray(response?.roomList) ? response.roomList : []);
+      if (!Array.isArray(list)) throw new Error('Formato de respuesta inesperado');
 
-        setRooms(roomsWithCompatibility);
-        setFilteredRooms(roomsWithCompatibility);
-      } else {
-        throw new Error('No se pudieron cargar las habitaciones');
-      }
-    } catch (error) {
-      console.error('Error cargando habitaciones:', error);
-      setError('Error cargando habitaciones: ' + error.message);
+      const mapped = list.map(room => ({
+        ...room,
+        titulo: room.roomType,
+        precio: room.roomPrice?.toString() || '0',
+        imagen: room.roomPhotoUrl,
+        capacidad: getCapacityFromRoomType(room.roomType),
+        descripcion: room.roomDescription,
+      }));
+      setRooms(mapped);
+      setFilteredRooms(mapped);
+    } catch (err) {
+      let msg = 'Error cargando habitaciones';
+      if (err.message === 'Network Error') msg += ': no se pudo contactar el servidor.';
+      else msg += ': ' + err.message;
+      setError(msg);
     } finally {
       setLoading(false);
     }
   };
 
-  // Buscar habitaciones con fechas
+  const applyLocalFilters = (baseRooms) => {
+    let result = [...baseRooms];
+    if (filters.guests !== 'all') {
+      const g = parseInt(filters.guests, 10);
+      if (!isNaN(g)) {
+        result = result.filter(r => (r.capacidad || getCapacityFromRoomType(r.roomType)) >= g);
+      }
+    }
+    result = result.filter(r => {
+      const raw = parseFloat(r.roomPrice || r.precio?.replace(/[,\.]/g, '') || '0');
+      if (filters.priceRange === 'low') return raw <= 200000;
+      if (filters.priceRange === 'medium') return raw >= 200000 && raw <= 300000;
+      if (filters.priceRange === 'high') return raw > 300000;
+      return true;
+    });
+    if (filters.roomType !== 'all' && (!filters.checkIn || !filters.checkOut)) {
+      result = result.filter(r => (r.roomType || '').toLowerCase() === filters.roomType.toLowerCase());
+    }
+    setFilteredRooms(result);
+  };
+
   const searchRoomsWithDates = async () => {
     if (!filters.checkIn || !filters.checkOut) {
-      setFilteredRooms(rooms);
+      applyLocalFilters(rooms);
       setSearchMode(false);
       return;
     }
-
+    if (filters.roomType === 'all') {
+      applyLocalFilters(rooms);
+      setSearchMode(false);
+      return;
+    }
     try {
       setLoading(true);
-      const searchParams = {
+      const res = await ApiService.searchAvailableRooms({
         checkInDate: filters.checkIn,
         checkOutDate: filters.checkOut,
-        roomType: filters.roomType !== 'all' ? filters.roomType : null
-      };
-
-      const response = await ApiService.searchAvailableRooms(searchParams);
-      
-      if (response.statusCode === 200 && response.roomList) {
-        const availableRooms = response.roomList.map(room => ({
-          ...room,
-          titulo: room.roomType,
-          precio: room.roomPrice?.toString() || '0',
-          imagen: room.roomPhotoUrl,
-          capacidad: getCapacityFromRoomType(room.roomType),
-          descripcion: room.roomDescription
-        }));
-        
-        setFilteredRooms(availableRooms);
-        setSearchMode(true);
-      } else {
-        setFilteredRooms([]);
-        setSearchMode(true);
-      }
-    } catch (error) {
-      console.error('Error buscando habitaciones:', error);
-      setFilteredRooms(rooms);
+        roomType: filters.roomType
+      });
+      const list = Array.isArray(res)
+        ? res
+        : (Array.isArray(res?.roomList) ? res.roomList : []);
+      const mapped = list.map(room => ({
+        ...room,
+        titulo: room.roomType,
+        precio: room.roomPrice?.toString() || '0',
+        imagen: room.roomPhotoUrl,
+        capacidad: getCapacityFromRoomType(room.roomType),
+        descripcion: room.roomDescription
+      }));
+      applyLocalFilters(mapped);
+      setSearchMode(true);
+    } catch {
+      applyLocalFilters(rooms);
       setSearchMode(false);
     } finally {
       setLoading(false);
@@ -651,28 +678,25 @@ const ReservasPage = () => {
 
   useEffect(() => {
     loadRoomsFromBackend();
+    loadRoomTypes();
   }, []);
 
   useEffect(() => {
-    if (rooms.length > 0) {
-      const timeoutId = setTimeout(() => {
-        searchRoomsWithDates();
-      }, 300);
-      return () => clearTimeout(timeoutId);
+    if (rooms.length === 0) return;
+    if (filters.checkIn || filters.checkOut) {
+      const t = setTimeout(() => searchRoomsWithDates(), 300);
+      return () => clearTimeout(t);
+    } else {
+      applyLocalFilters(rooms);
     }
-  }, [filters.checkIn, filters.checkOut, rooms]);
+  }, [filters, rooms]); // eslint-disable-line
 
-  const handleFilterChange = (filterType, value) => {
-    setFilters(prev => ({
-      ...prev,
-      [filterType]: value
-    }));
+  const handleFilterChange = (type, value) => {
+    setFilters(prev => ({ ...prev, [type]: value }));
   };
 
-  const formatPrice = (price) => {
-    const numPrice = parseFloat(price || '0');
-    return new Intl.NumberFormat('es-CO').format(numPrice);
-  };
+  const formatPriceNumber = (price) =>
+    new Intl.NumberFormat('es-CO').format(parseFloat(price || '0'));
 
   if (loading && rooms.length === 0) {
     return (
@@ -686,28 +710,24 @@ const ReservasPage = () => {
   return (
     <>
       <div className="reservas-page">
-        {/* Hero Section */}
         <section className="reservas-hero">
           <div className="hero-content">
             <a href="/" className="back-link">
-              <ArrowLeft size={16} />
-              Volver al inicio
+              <ArrowLeft size={16} /> Volver al inicio
             </a>
             <h1>Nuestras Habitaciones</h1>
             <p>Descubre el espacio perfecto para tu estadía en el Hotel La Tía Emiss, Salento.</p>
-            
-            {/* Panel de usuario y acciones */}
+
             <div className="user-actions">
               {isAuthenticated ? (
                 <div className="user-info">
                   <span>Bienvenido, {user.name}</span>
-                  {isAdmin() && (
-                    <button 
+                  {isAdmin && typeof isAdmin === 'function' && isAdmin() && (
+                    <button
                       className="admin-btn"
                       onClick={() => setAllBookingsModalOpen(true)}
                     >
-                      <Eye size={16} />
-                      Ver todas las reservas
+                      <Eye size={16} /> Ver todas las reservas
                     </button>
                   )}
                 </div>
@@ -715,24 +735,21 @@ const ReservasPage = () => {
                 <div className="auth-prompt">
                   <p>Inicia sesión para hacer reservas</p>
                   <a href="/login" className="login-link">
-                    <LogIn size={16} />
-                    Iniciar Sesión
+                    <LogIn size={16} /> Iniciar Sesión
                   </a>
                 </div>
               )}
-              
-              <button 
+
+              <button
                 className="search-booking-btn"
                 onClick={() => setSearchModalOpen(true)}
               >
-                <Search size={16} />
-                Buscar Reserva
+                <Search size={16} /> Buscar Reserva
               </button>
             </div>
           </div>
         </section>
 
-        {/* Mostrar errores */}
         {error && (
           <div className="error-message">
             <p>{error}</p>
@@ -740,7 +757,6 @@ const ReservasPage = () => {
           </div>
         )}
 
-        {/* Filtros con fechas */}
         <section className="filters-section">
           <div className="filters-container">
             <div className="date-filters">
@@ -753,7 +769,6 @@ const ReservasPage = () => {
                   min={new Date().toISOString().split('T')[0]}
                 />
               </div>
-
               <div className="filter-group">
                 <label>Check-out</label>
                 <input
@@ -768,8 +783,8 @@ const ReservasPage = () => {
             <div className="additional-filters">
               <div className="filter-group">
                 <label>Huéspedes</label>
-                <select 
-                  value={filters.guests} 
+                <select
+                  value={filters.guests}
                   onChange={(e) => handleFilterChange('guests', e.target.value)}
                 >
                   <option value="all">Cualquier cantidad</option>
@@ -782,8 +797,8 @@ const ReservasPage = () => {
 
               <div className="filter-group">
                 <label>Rango de precio</label>
-                <select 
-                  value={filters.priceRange} 
+                <select
+                  value={filters.priceRange}
                   onChange={(e) => handleFilterChange('priceRange', e.target.value)}
                 >
                   <option value="all">Todos los precios</option>
@@ -792,29 +807,38 @@ const ReservasPage = () => {
                   <option value="high">Más de $300.000</option>
                 </select>
               </div>
+
+              <div className="filter-group">
+                <label>Tipo Habitación</label>
+                <select
+                  value={filters.roomType}
+                  onChange={(e) => handleFilterChange('roomType', e.target.value)}
+                  disabled={loadingRoomTypes}
+                >
+                  <option value="all">Todas</option>
+                  {roomTypes.map(rt => (
+                    <option key={rt} value={rt}>{rt}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <div className="results-count">
               {loading && <Loader size={16} className="spinner inline" />}
-              {filteredRooms.length} habitación{filteredRooms.length !== 1 ? 'es' : ''} 
-              {searchMode ? ' disponible' : ' encontrada'}{filteredRooms.length !== 1 ? 's' : ''}
-              {filters.checkIn && filters.checkOut && (
-                <span> para las fechas seleccionadas</span>
-              )}
+              {filteredRooms.length} habitación{filteredRooms.length !== 1 ? 'es' : ''} {searchMode ? 'disponible' : 'encontrada'}{filteredRooms.length !== 1 ? 's' : ''}
+              {filters.checkIn && filters.checkOut && <span> para las fechas seleccionadas</span>}
             </div>
           </div>
         </section>
 
-        {/* Lista de Habitaciones */}
         <section className="rooms-list">
           {filteredRooms.length === 0 && !loading ? (
             <div className="no-results">
               <h3>No se encontraron habitaciones</h3>
               <p>
-                {searchMode 
-                  ? 'No hay habitaciones disponibles para las fechas y filtros seleccionados.'
-                  : 'Intenta ajustar tus filtros para ver más opciones disponibles.'
-                }
+                {searchMode
+                  ? 'No hay habitaciones disponibles para las fechas / filtros.'
+                  : 'Ajusta los filtros para ver más opciones.'}
               </p>
               <button onClick={() => {
                 setFilters({
@@ -822,22 +846,19 @@ const ReservasPage = () => {
                   priceRange: 'all',
                   amenities: 'all',
                   checkIn: '',
-                  checkOut: ''
+                  checkOut: '',
+                  roomType: 'all'
                 });
-              }}>
-                Limpiar filtros
-              </button>
+              }}>Limpiar filtros</button>
             </div>
           ) : (
-            filteredRooms.map((room) => (
-              <div key={room.id} className="room-card">
+            filteredRooms.map(room => (
+              <div key={room.id || room.roomId} className="room-card">
                 <div className="room-image">
-                  <img 
-                    src={room.roomPhotoUrl || room.imagen || '/default-room.jpg'} 
+                  <img
+                    src={room.roomPhotoUrl || room.imagen || '/default-room.jpg'}
                     alt={room.roomType || room.titulo}
-                    onError={(e) => {
-                      e.target.src = '/default-room.jpg';
-                    }}
+                    onError={(e) => { e.target.src = '/default-room.jpg'; }}
                   />
                 </div>
 
@@ -856,33 +877,21 @@ const ReservasPage = () => {
                   <div className="room-features">
                     <div className="feature">
                       <Users size={16} />
-                      <span>
-                        {room.capacidad || getCapacityFromRoomType(room.roomType || room.titulo)} 
-                        {' personas'}
-                      </span>
+                      <span>{room.capacidad || getCapacityFromRoomType(room.roomType || room.titulo)} personas</span>
                     </div>
-                    <div className="feature">
-                      <Wifi size={16} />
-                      <span>WiFi Gratuito</span>
-                    </div>
-                    <div className="feature">
-                      <Bath size={16} />
-                      <span>Baño Privado</span>
-                    </div>
-                    <div className="feature">
-                      <Coffee size={16} />
-                      <span>Amenidades</span>
-                    </div>
+                    <div className="feature"><Wifi size={16} /><span>WiFi Gratuito</span></div>
+                    <div className="feature"><Bath size={16} /><span>Baño Privado</span></div>
+                    <div className="feature"><Coffee size={16} /><span>Amenidades</span></div>
                   </div>
 
                   <div className="room-footer">
                     <div className="price-info">
                       <div className="price">
-                        ${formatPrice(room.roomPrice || room.precio?.replace(/[,\.]/g, '') || '0')}
+                        ${formatPriceNumber(room.roomPrice || room.precio?.replace(/[,\.]/g, '') || '0')}
                       </div>
                       <div className="period">COP por noche</div>
                     </div>
-                    <button 
+                    <button
                       className="reserve-btn"
                       onClick={() => {
                         setSelectedRoom(room);
@@ -899,20 +908,17 @@ const ReservasPage = () => {
         </section>
       </div>
 
-      {/* Modales */}
-      <ModalReserva 
+      <ModalReserva
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         habitacion={selectedRoom}
       />
-
-      <BookingSearchModal 
+      <BookingSearchModal
         isOpen={searchModalOpen}
         onClose={() => setSearchModalOpen(false)}
       />
-
-      {isAdmin() && (
-        <AllBookingsModal 
+      {isAdmin && typeof isAdmin === 'function' && isAdmin() && (
+        <AllBookingsModal
           isOpen={allBookingsModalOpen}
           onClose={() => setAllBookingsModalOpen(false)}
         />
