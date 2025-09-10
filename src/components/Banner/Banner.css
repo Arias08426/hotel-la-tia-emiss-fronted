@@ -1,0 +1,431 @@
+/* Banner Container */
+.banner {
+  position: relative;
+  height: 100vh;
+  min-height: 650px;
+  width: 100vw;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+/* Carousel Container */
+.banner-carousel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.banner-swiper {
+  width: 100%;
+  height: 100%;
+}
+
+.slide-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.slide-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.slide-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    rgba(0,0,0,0.4) 0%,
+    rgba(0,0,0,0.2) 50%,
+    rgba(0,0,0,0.5) 100%
+  );
+}
+
+/* Navigation Buttons */
+.navigation-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255,255,255,0.3);
+  color: white;
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 100;
+}
+
+.swiper-button-prev-custom {
+  left: 30px;
+}
+
+.swiper-button-next-custom {
+  right: 30px;
+}
+
+.navigation-btn:hover {
+  background: rgba(212, 117, 26, 0.9);
+  border-color: rgba(212, 117, 26, 0.9);
+  transform: translateY(-50%) scale(1.05);
+  box-shadow: 0 10px 30px rgba(212, 117, 26, 0.3);
+}
+
+/* Custom Pagination */
+.swiper-pagination-custom {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 100;
+}
+
+.swiper-pagination-bullet-custom {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.5);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.swiper-pagination-bullet-active-custom {
+  background: #d4751a;
+  border-color: rgba(255,255,255,0.8);
+  transform: scale(1.2);
+}
+
+/* Banner Content */
+.banner-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 50;
+  text-align: center;
+  color: white;
+  padding: 0 20px;
+}
+
+.container {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Location Badge */
+.location-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(10px);
+  padding: 8px 16px;
+  border-radius: 25px;
+  border: 1px solid rgba(255,255,255,0.3);
+  margin-bottom: 25px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Banner Text */
+.banner-text {
+  margin-bottom: 60px;
+}
+
+.banner-title {
+  font-size: clamp(2.2rem, 4.5vw, 3.5rem);
+  font-weight: 300;
+  line-height: 1.2;
+  margin-bottom: 25px;
+  text-shadow: 2px 2px 8px rgba(0,0,0,0.4);
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  letter-spacing: -0.5px;
+}
+
+.banner-title .highlight {
+  color: #d4751a;
+  font-weight: 500;
+}
+
+.banner-subtitle {
+  font-size: 1.2rem;
+  font-weight: 300;
+  opacity: 0.95;
+  max-width: 600px;
+  margin: 0 auto;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+  font-style: italic;
+}
+
+/* Search Form */
+.search-form-container {
+  width: 100%;
+  max-width: 850px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+}
+
+.search-form {
+  background: rgba(255,255,255,0.98);
+  backdrop-filter: blur(15px);
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.5);
+  width: 100%;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 20px;
+  align-items: end;
+  justify-items: stretch;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  position: relative;
+}
+
+.form-group label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #666;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-group input,
+.form-group select {
+  padding: 12px 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 400;
+  transition: all 0.3s ease;
+  background: white;
+  color: #333;
+  width: 100%;
+  position: relative;
+}
+
+/* Forzar el calendario en inputs de fecha */
+.form-group input[type="date"] {
+  position: relative;
+  color: #333;
+}
+
+.form-group input[type="date"]::-webkit-calendar-picker-indicator {
+  background: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23666' class='bi bi-calendar' viewBox='0 0 16 16'><path d='M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z'/></svg>") no-repeat center center;
+  color: transparent;
+  position: absolute;
+  right: 10px;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+/* Para navegadores que no soportan webkit */
+.form-group input[type="date"]::-moz-calendar-picker-indicator {
+  background: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23666' class='bi bi-calendar' viewBox='0 0 16 16'><path d='M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z'/></svg>") no-repeat center center;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #d4751a;
+  box-shadow: 0 0 0 2px rgba(212, 117, 26, 0.1);
+}
+
+.search-btn {
+  background: #d4751a;
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(212, 117, 26, 0.3);
+  white-space: nowrap;
+  justify-self: end;
+}
+
+.search-btn:hover {
+  background: #c06318;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(212, 117, 26, 0.4);
+}
+
+.search-btn:active {
+  transform: translateY(0);
+}
+
+.search-note {
+  text-align: center;
+  margin-top: 12px;
+  color: #777;
+  font-size: 13px;
+  font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .banner {
+    height: 85vh;
+    min-height: 550px;
+  }
+  
+  .banner-title {
+    font-size: clamp(2rem, 3.5vw, 2.8rem);
+  }
+  
+  .banner-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+  
+  .search-btn {
+    grid-column: span 2;
+    padding: 14px 25px;
+  }
+}
+
+@media (max-width: 768px) {
+  .banner {
+    height: 100vh;
+    min-height: 600px;
+  }
+  
+  .banner-content {
+    padding: 0 20px;
+    justify-content: center;
+  }
+  
+  .banner-text {
+    margin-bottom: 40px;
+  }
+  
+  .banner-title {
+    font-size: clamp(1.8rem, 5vw, 2.2rem);
+    margin-bottom: 20px;
+  }
+  
+  .banner-subtitle {
+    font-size: 1rem;
+  }
+  
+  .search-form {
+    padding: 20px;
+    border-radius: 12px;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .form-group input,
+  .form-group select {
+    padding: 14px;
+    font-size: 16px;
+  }
+  
+  .search-btn {
+    padding: 14px 24px;
+    font-size: 14px;
+  }
+  
+  .navigation-btn {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .swiper-button-prev-custom {
+    left: 15px;
+  }
+  
+  .swiper-button-next-custom {
+    right: 15px;
+  }
+  
+  .swiper-pagination-custom {
+    bottom: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .banner {
+    min-height: 100vh;
+  }
+  
+  .banner-content {
+    padding: 0 15px;
+  }
+  
+  .location-badge {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+  
+  .search-form {
+    padding: 18px;
+  }
+  
+  .navigation-btn {
+    width: 40px;
+    height: 40px;
+    display: none; /* Ocultar en pantallas muy pequeñas */
+  }
+  
+  .banner-title {
+    font-size: clamp(1.6rem, 6vw, 2rem);
+  }
+}
