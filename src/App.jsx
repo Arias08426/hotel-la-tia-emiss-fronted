@@ -11,7 +11,7 @@ import Contacto from './pages/Contacto/Contacto';
 import NuestrosServicios from './pages/NuestrosServicios/NuestrosServicios';
 import Login from './components/Auth/Login'; 
 import Register from './components/Auth/Register';
-import CalendarioReservas from './pages/Reservas/CalendarioReservas.jsx';
+import CalendarioReservasPro from './pages/Reservas/CalendarioReservasPro';
 import { AuthProvider } from './context/AuthContext.jsx';
 
 import './styles/global.css';
@@ -33,7 +33,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               // import CalendarioReservas ...
-<Route path="/calendario-reservas" element={<CalendarioReservas />} />
+<Route path="/calendario-reservas" element={<CalendarioReservasPro />} />
               {/* Opcional: Ruta 404
               <Route path="*" element={<div style={{padding: '4rem', textAlign:'center'}}>Página no encontrada</div>} />
               */}

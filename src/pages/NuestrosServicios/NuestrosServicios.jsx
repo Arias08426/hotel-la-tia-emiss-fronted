@@ -350,30 +350,6 @@ const Servicios = () => {
         </div>
       </section>
 
-      
-      {/* Call to Action */}
-      <section className="cta-servicios">
-        <div className="container">
-          <div className="cta-content">
-            <h2>¿Listo para vivir estas experiencias?</h2>
-            <p>Reserva ahora y crea recuerdos inolvidables en el corazón del eje cafetero</p>
-            <div className="cta-buttons">
-              <button 
-                className="btn-primary"
-                onClick={() => handleReservarServicio({ titulo: 'nuestros servicios' })}
-              >
-                <Phone size={18} />
-                <span>Reservar por WhatsApp</span>
-              </button>
-              <a href="/contacto" className="btn-secondary">
-                <Mail size={16} />
-                <span>Más Información</span>
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Modal de detalles */}
       {selectedService && (
         <div className="modal-overlay" onClick={() => setSelectedService(null)}>
